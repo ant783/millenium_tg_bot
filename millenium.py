@@ -73,7 +73,7 @@ async def cmd_start(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔄 Обновить прокси", callback_data="update_proxies")]
     ])
-    text = """👋 Добро пожаловать!
+    text = """👋 Добро пожаловать! (beta)
 
 🔥 3 случайных MTProto прокси
 
