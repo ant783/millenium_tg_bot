@@ -39,6 +39,7 @@ async def fetch_proxies():
     for url in PROXY_URLS:
         try:
             if 'raw.githubusercontent.com' in url:
+                # GitHub txt файлы
                 async with aiohttp.ClientSession() as session:
                     async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                         if resp.status == 200:
@@ -47,7 +48,8 @@ async def fetch_proxies():
                             all_proxies.extend(proxies)
                             logger.info(f"✅ {url}: {len(proxies)} прокси")
             else:
-                headers = {'User-Agent': 'Mozilla/5.0 \\(Windows NT 10\\.0\\; Win64\\; x64\\) AppleWebKit/537\\.36'}
+                # HTML сайты
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
                 async with aiohttp.ClientSession() as session:
                     async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as resp:
                         if resp.status == 200:
@@ -60,6 +62,7 @@ async def fetch_proxies():
         except Exception as e:
             logger.error(f"❌ {url}: {e}")
     
+    # Удаляем дубликаты
     unique_proxies = list(set(all_proxies))
     logger.info(f"🎉 Всего уникальных прокси: {len(unique_proxies)}")
     return unique_proxies
@@ -70,21 +73,20 @@ async def cmd_start(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔄 Обновить прокси", callback_data="update_proxies")]
     ])
-    # ✅ Экранирование для MarkdownV2
-    text = (
-        "👋 \\*Добро пожаловать!\\*\\n\\n"
-        "🔥 \\*3 случайных MTProto прокси\\*\\n\\n"
-        "⚡ \\*Нажмите кнопку ниже и получишь результат!\\*"
-    )
-    await message.answer(text, reply_markup=keyboard, parse_mode="MarkdownV2")
+    text = """👋 Добро пожаловать!
+
+🔥 3 случайных MTProto прокси
+
+⚡ Нажмите кнопку ниже и получишь результат!"""
+    await message.answer(text, reply_markup=keyboard)
 
 @dp.callback_query(lambda c: c.data == "update_proxies")
 async def update_proxies_handler(callback: CallbackQuery):
-    await callback.message.edit_text("⏳ Загружаем свежие прокси\\.")
+    await callback.message.edit_text("⏳ Загружаем свежие прокси...")
     
     proxies = await fetch_proxies()
     if not proxies:
-        await callback.message.edit_text("❌ Прокси временно недоступны\\. Попробуйте позже\\.")
+        await callback.message.edit_text("❌ Прокси временно недоступны. Попробуйте позже.")
         await callback.answer()
         return
     
@@ -96,28 +98,26 @@ async def update_proxies_handler(callback: CallbackQuery):
         keyboard_rows.append([InlineKeyboardButton(text="connect", url=proxy)])
     keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_rows)
     
-    # ✅ ПОЛНОЕ экранирование MarkdownV2
-    count_text = f"{available_count} случайных MTProto прокси"
-    text = (
-        f"🔥 \\*{count_text}:\\*\\n\\n"
-    )
+    # ✅ ПРОСТОЙ ТЕКСТ БЕЗ MarkdownV2
+    text = f"""🔥 {available_count} случайных MTProto прокси:
+
+"""
     for i, proxy in enumerate(selected, 1):
-        short_link = proxy[:60] + "\\.\\.\\." if len(proxy) > 60 else proxy
-        text += f"{i}\\. `{short_link}`\\n\\n"
-    text += "👇 \\*Кнопка connect после каждого прокси!\\*"
+        short_link = proxy[:60] + "..." if len(proxy) > 60 else proxy
+        text += f"{i}. {short_link}\n\n"
     
-    await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="MarkdownV2")
+    text += "👇 Кнопка connect после каждого прокси!"
+    
+    await callback.message.edit_text(text, reply_markup=keyboard)
     await callback.answer("✅ Готово!")
 
 @dp.message(Command("help"))
 async def cmd_help(message: Message):
-    text = (
-        "Этот бот выдаёт MTProto\\-прокси\\.\\n"
-        "Команды:\\n"
-        "/start – меню\\n"
-        "/help – помощь"
-    )
-    await message.answer(text, parse_mode="MarkdownV2")
+    text = """Этот бот выдаёт MTProto-прокси.
+Команды:
+/start – меню
+/help – помощь"""
+    await message.answer(text)
 
 # ---------------- ЗАПУСК ----------------
 async def main():
