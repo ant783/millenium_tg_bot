@@ -1,6 +1,6 @@
 # 🐱‍💻 Millenium Proxy Bot — Прокси для Telegram без нервов! 🚀
 
-Бот - @milleniumprm_bot
+# Бот - @milleniumprm_bot
 
 "Когда Telegram говорит 'заблокировано', а ты отвечаешь 'держи прокси!' 🤫
 
